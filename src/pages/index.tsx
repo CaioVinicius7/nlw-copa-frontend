@@ -1,11 +1,13 @@
+import { FormEvent, useState } from "react";
 import { GetServerSideProps } from "next";
 import Image from "next/image";
+
+import { api } from "../lib/axios";
 
 import appPreviewImg from "../assets/app-nlw-copa-preview.png";
 import logoImg from "../assets/logo.svg";
 import usersAvatarExampleImg from "../assets/user-avatar-example.png";
 import iconCheckImg from "../assets/icon-check.svg";
-import { api } from "../lib/axios";
 
 interface HomeProps {
 	poolCount: number;
@@ -14,6 +16,30 @@ interface HomeProps {
 }
 
 export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
+	const [poolTitle, setPoolTitle] = useState("");
+
+	async function createPool(event: FormEvent) {
+		event.preventDefault();
+
+		try {
+			const response = await api.post("/pools", {
+				title: poolTitle
+			});
+
+			const { code } = response.data;
+
+			await navigator.clipboard.writeText(code);
+
+			setPoolTitle("");
+
+			alert(
+				"Bolão criado com sucesso, o código foi copiado para a área de transferência!"
+			);
+		} catch (error) {
+			alert("Falha ao criar o bolão, tente novamente!");
+		}
+	}
+
 	return (
 		<div className="max-w-[450px] px-4 py-10 h-full mx-auto grid grid-cols items-center gap-28 md:px-0 xl:grid-cols-2 md:max-w-[600px] xl:max-w-[1124px] xs:h-screen">
 			<main>
@@ -32,12 +58,17 @@ export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
 					</strong>
 				</div>
 
-				<form className="mt-10 flex flex-col gap-2 sm:flex-row">
+				<form
+					onSubmit={createPool}
+					className="mt-10 flex flex-col gap-2 sm:flex-row"
+				>
 					<input
-						className="flex-1 px-6 py-4 rounded bg-gray-800 border border-gray-600 text-sm"
+						className="flex-1 px-6 py-4 rounded bg-gray-800 border border-gray-600 text-gray-100 text-sm"
 						type="text"
 						placeholder="Qual nome do seu bolão?"
 						required
+						value={poolTitle}
+						onChange={(e) => setPoolTitle(e.target.value)}
 					/>
 
 					<button
@@ -56,6 +87,7 @@ export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
 				<div className="mt-10 pt-10 border-t border-gray-600 flex justify-evenly text-gray-100 text-center xs:text-start xs:justify-between">
 					<div className="flex flex-col items-center gap-3 xs:gap-6 xs:flex-row">
 						<Image src={iconCheckImg} alt="" className="w-8 xs:w-10" />
+
 						<div className="flex flex-col">
 							<span className="font-bold text-sm xs:text-2xl">
 								+{poolCount}
@@ -68,6 +100,7 @@ export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
 
 					<div className="flex flex-col items-center gap-3 xs:gap-6 xs:flex-row">
 						<Image src={iconCheckImg} alt="" className="w-8 xs:w-10" />
+
 						<div className="flex flex-col">
 							<span className="font-bold text-sm xs:text-2xl">
 								+{guessCount}
