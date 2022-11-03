@@ -22,7 +22,7 @@ export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
 		event.preventDefault();
 
 		try {
-			const response = await api.post("/pools", {
+			const response = await api.post("/polls", {
 				title: poolTitle
 			});
 
@@ -124,7 +124,7 @@ export default function Home({ poolCount, guessCount, userCount }: HomeProps) {
 export const getServerSideProps: GetServerSideProps = async () => {
 	const [poolCountResponse, guessCountResponse, userCountResponse] =
 		await Promise.all([
-			api("/pools/count"),
+			api("/polls/count"),
 			api("/guesses/count"),
 			api("/users/count")
 		]);
